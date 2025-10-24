@@ -16,27 +16,27 @@ module.exports = {
     const nome = interaction.options.getString('nome');
     const usuario = interaction.user.username;
 
-    await interaction.deferReply(); // mostra "pensando..."
+    await interaction.deferReply();
 
     try {
       const filme = await gerarInfoFilme(nome);
 
-  const camposVazios = [
-    filme.titulo,
-    filme.ano,
-    filme.diretor,
-    filme.genero,
-    filme.atores,
-    filme.sinopse,
-    filme.nota,
-    filme.onde_assistir
-  ].every(campo => !campo || campo.trim() === "");
+      const camposVazios = [
+        filme.titulo,
+        filme.ano,
+        filme.diretor,
+        filme.genero,
+        filme.atores,
+        filme.sinopse,
+        filme.nota,
+        filme.onde_assistir
+      ].every(campo => !campo || campo.trim() === "");
 
-  if (camposVazios) {
-    return interaction.editReply({
-      content: `❌ Filme "${nome}" não encontrado ou não possui informações disponíveis.`,
-    });
-  }
+      if (camposVazios) {
+        return interaction.editReply({
+          content: `❌ Filme "${nome}" não encontrado ou não possui informações disponíveis.`,
+        });
+      }
 
       // Checa se já foi adicionado
       const added = addFilme(filme.titulo, usuario);
@@ -56,13 +56,13 @@ module.exports = {
           { name: '🎭 Gênero', value: filme.genero || '—', inline: true },
           { name: '⭐ Nota', value: filme.nota || '—', inline: true },
           { name: '🎬 Atores', value: filme.atores || '—', inline: false },
-          { name: '⁉️ Onde assistir', value: filme.onde_assistir || '—', inline: false },
+          { name: '📺 Onde assistir', value: filme.onde_assistir || '—', inline: false },
           { name: '👤 Adicionado por', value: usuario, inline: false }
         );
 
-      // Adiciona capa do filme se existir e for URL válida
+      // Adiciona poster como thumbnail
       if (filme.poster_url && filme.poster_url.startsWith('http')) {
-        embed.setImage(filme.poster_url);
+        embed.setThumbnail(filme.poster_url);
       }
 
       return interaction.editReply({ embeds: [embed] });

@@ -1,11 +1,30 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const axios = require("axios");
 require("dotenv").config();
 
-// Inicializa o cliente do Gemini com a chave da API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+async function buscarPosterOMDB(nomeFilme) {
+  try {
+    const response = await axios.get('http://www.omdbapi.com/', {
+      params: {
+        apikey: process.env.OMDB_API_KEY,
+        t: nomeFilme,
+        type: 'movie'
+      }
+    });
+
+    if (response.data.Response === "True" && response.data.Poster !== "N/A") {
+      return response.data.Poster;
+    }
+    return null;
+  } catch (error) {
+    console.error("Erro ao buscar poster no OMDB:", error.message);
+    return null;
+  }
+}
+
 async function gerarInfoFilme(nome) {
-  // Escolhe o modelo. "gemini-1.5-flash" é rápido e excelente para tarefas como esta.
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash",
   });
@@ -20,26 +39,27 @@ async function gerarInfoFilme(nome) {
       "atores": "",
       "sinopse": "",
       "nota": "",
-      "onde_assistir:" ""
+      "onde_assistir": ""
     }
-      Nao invente filmes. Se o filme nao existir, deixe todos os campos em branco.
-    `;
+    Nao invente filmes. Se o filme nao existir, deixe todos os campos em branco.
+  `;
 
   try {
-    // Faz a chamada para a API
     const result = await model.generateContent({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      // ✅ Esta é a configuração que força a saída em JSON puro
       generationConfig: {
         response_mime_type: "application/json",
       },
     });
 
-    // Extrai o texto da resposta
     const responseText = result.response.text();
+    const filmeInfo = JSON.parse(responseText);
     
-    // Converte o texto JSON para um objeto JavaScript e o retorna
-    return JSON.parse(responseText);
+    // Busca o poster no OMDB
+    const posterUrl = await buscarPosterOMDB(filmeInfo.titulo || nome);
+    filmeInfo.poster_url = posterUrl;
+
+    return filmeInfo;
 
   } catch (error) {
     console.error("Erro ao gerar informação do filme com Gemini:", error);
