@@ -13,7 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^14.23.2",
+    "@google/generative-ai": "^0.24.1",
+    "discord.js": "^14.24.0",
     "dotenv": "^17.2.3",
     "node-cron": "^4.2.1",
     "remove-accents": "^0.5.0"

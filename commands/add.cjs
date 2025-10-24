@@ -1,4 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { gerarInfoFilme } = require('../utils/geminiManager.cjs');
 const { addFilme } = require('../utils/movieManager.cjs');
 
 module.exports = {
@@ -12,21 +13,41 @@ module.exports = {
     ),
 
   async execute(interaction) {
-    const nomeFilme = interaction.options.getString('nome');
+    const nome = interaction.options.getString('nome');
     const usuario = interaction.user.username;
 
-    const added = addFilme(nomeFilme, usuario);
+    await interaction.deferReply(); // mostra "pensando..."
 
-    if (!added) {
-      return interaction.reply({
-        content: `Esse filme já foi adicionado, parceiro!`,
-        ephemeral: true,
+    try {
+      const filme = await gerarInfoFilme(nome);
+
+      const added = addFilme(filme.titulo, usuario);
+      if (!added) {
+        return interaction.editReply({
+          content: `O filme **${filme.titulo}** já está na lista.`,
+        });
+      }
+
+      const embed = new EmbedBuilder()
+        .setTitle(`${filme.titulo} (${filme.ano})`)
+        .setDescription(filme.sinopse)
+        .setColor(0x00ffff)
+        .addFields(
+          { name: '🎥 Diretor', value: filme.diretor || '—', inline: true },
+          { name: '🎭 Gênero', value: filme.genero || '—', inline: true },
+          { name: '⭐ Nota', value: filme.nota || '—', inline: true },
+          { name: '🎬 Atores', value: filme.atores || '—', inline: false },
+          { name: '👤 Adicionado por', value: usuario, inline: false }
+        );
+
+      if (filme.poster_url) embed.setImage(filme.poster_url);
+
+      return interaction.editReply({ embeds: [embed] });
+    } catch (err) {
+      console.error(err);
+      return interaction.editReply({
+        content: 'Erro ao gerar informações do filme 😕',
       });
     }
-
-    return interaction.reply({
-      content: `Filme **${nomeFilme}** adicionado à fila por **${usuario}**`,
-      ephemeral: false,
-    });
   },
 };

@@ -16,6 +16,7 @@ module.exports = {
 /sortear - Sorteia um filme manualmente
 /clear - Limpa todos os filmes da lista
 /help - Mostra esta mensagem
+/ping - Pong! Retorna meu ping atual
       `)
       .setFooter({ text: 'Pega a pipoca e aproveita 🎥' });
 
