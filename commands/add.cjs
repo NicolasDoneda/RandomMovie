@@ -21,6 +21,24 @@ module.exports = {
     try {
       const filme = await gerarInfoFilme(nome);
 
+  const camposVazios = [
+    filme.titulo,
+    filme.ano,
+    filme.diretor,
+    filme.genero,
+    filme.atores,
+    filme.sinopse,
+    filme.nota,
+    filme.onde_assistir
+  ].every(campo => !campo || campo.trim() === "");
+
+  if (camposVazios) {
+    return interaction.editReply({
+      content: `❌ Filme "${nome}" não encontrado ou não possui informações disponíveis.`,
+    });
+  }
+
+      // Checa se já foi adicionado
       const added = addFilme(filme.titulo, usuario);
       if (!added) {
         return interaction.editReply({
@@ -28,6 +46,7 @@ module.exports = {
         });
       }
 
+      // Cria embed
       const embed = new EmbedBuilder()
         .setTitle(`${filme.titulo} (${filme.ano})`)
         .setDescription(filme.sinopse)
@@ -37,10 +56,14 @@ module.exports = {
           { name: '🎭 Gênero', value: filme.genero || '—', inline: true },
           { name: '⭐ Nota', value: filme.nota || '—', inline: true },
           { name: '🎬 Atores', value: filme.atores || '—', inline: false },
+          { name: '⁉️ Onde assistir', value: filme.onde_assistir || '—', inline: false },
           { name: '👤 Adicionado por', value: usuario, inline: false }
         );
 
-      if (filme.poster_url) embed.setImage(filme.poster_url);
+      // Adiciona capa do filme se existir e for URL válida
+      if (filme.poster_url && filme.poster_url.startsWith('http')) {
+        embed.setImage(filme.poster_url);
+      }
 
       return interaction.editReply({ embeds: [embed] });
     } catch (err) {

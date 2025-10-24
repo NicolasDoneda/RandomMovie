@@ -16,16 +16,13 @@ async function gerarInfoFilme(nome) {
       "titulo": "",
       "ano": "",
       "diretor": "",
-  "genero": "",
+      "genero": "",
       "atores": "",
       "sinopse": "",
       "nota": "",
-      "poster_url": "URL direta para um arquivo .jpg ou .png"
+      "onde_assistir:" ""
     }
-    As respostas devem estar em português e **somente** o JSON deve ser retornado.
-    O valor de "poster_url" DEVE ser um link direto para uma imagem (terminando em .jpg, .png, ou .webp),
-    e NÃO um link para uma página web como IMDb ou Wikipedia.
-    Se nenhuma imagem for encontrada, retorne uma string vazia "".
+      Nao invente filmes. Se o filme nao existir, deixe todos os campos em branco.
     `;
 
   try {
